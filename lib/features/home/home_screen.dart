@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flag/flag.dart';
 import 'package:languageapp/features/streak/streak_screen.dart';
+import 'package:languageapp/features/home/screens/explore_levels_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -227,16 +228,24 @@ class _HomeView extends StatelessWidget {
                       ),
 
                       // Action Button
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE1F5FF).withOpacity(0.5),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.segment_rounded,
-                          color: Color(0xFF38B6FF),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ExploreLevelsScreen()),
+                          );
+                        },
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE1F5FF).withOpacity(0.5),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.segment_rounded,
+                            color: Color(0xFF38B6FF),
+                          ),
                         ),
                       ),
                     ],
