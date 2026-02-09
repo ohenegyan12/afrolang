@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:languageapp/features/auth/screens/signup_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+import 'package:languageapp/features/auth/screens/signup_screen.dart';
+
 import 'package:flag/flag.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -13,1362 +14,880 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  int _currentStep = 0;
-  
-  // State variables for selections
-  String? _nativeLanguage;
-  String? _learningLanguage;
-  String? _hearAboutUs; // New state variable
-  String? _proficiencyLevel;
-  String? _learningReason; // New state variable
-  
-  // Updated Daily Goal State
-  int _selectedDuration = 15; // Default 15 mins
-  String _selectedPeriod = "Morning"; // Default Morning
-
-  final int _totalSteps = 10; // Intro 1, Intro 2, Q1, Q2, Q3, Q4, Q5 (Reason), Q6, Loading, SignUp
+  int currentStep = 1;
+  String selectedLanguage = "TWI";
+  int? selectedOptionIndex;
+  int? selectedFluencyIndex;
 
   void _nextStep() {
+    if (selectedOptionIndex != null || currentStep == 3) {
+      setState(() {
+        if (currentStep == 2) {
+          selectedFluencyIndex = selectedOptionIndex;
+        }
+        currentStep++;
+        selectedOptionIndex = null; // Reset for next screen
+      });
+    }
+  }
+
+  void _previousStep() {
     setState(() {
-      _currentStep++;
+      currentStep--;
+      selectedOptionIndex = null;
     });
+  }
+
+  Widget _buildCurrentStep() {
+    switch (currentStep) {
+      case 1:
+        return _buildStep1();
+      case 2:
+        return _buildStep2();
+      case 3:
+        return _buildStep3();
+      case 4:
+        return _buildStep4();
+      case 5:
+        return _buildStep5();
+      case 6:
+        return _buildStep6();
+      case 7:
+        return _buildStep7();
+      default:
+        return _buildStep1();
+    }
+  }
+
+  Widget _buildContinueButton() {
+    // In step 3, button is always enabled because choice was made in step 2
+    // For steps 1, 2, 4, 5, and 6, the button is hidden due to auto-transition
+    bool isEnabled = currentStep == 3 || selectedOptionIndex != null;
+    String label = currentStep == 3 ? "Get Started" : "Continue";
+
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: ElevatedButton(
+          onPressed: isEnabled ? _nextStep : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isEnabled ? const Color(0xFF007A7A) : const Color(0xFFE0E0E0),
+            foregroundColor: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              if (currentStep == 3) ...[
+                const SizedBox(width: 8),
+                const Icon(Icons.chevron_right, size: 20),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        color: Colors.white,
-        child: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 500),
-                  transitionBuilder: (child, animation) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
-                  child: _buildStepContent(),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStepContent() {
-    switch (_currentStep) {
-      case 0: return _buildIntro1();
-      case 1: return _buildIntro2();
-      case 2: return _buildNativeLanguageStep();
-      case 3: return _buildLearningLanguageStep();
-      case 4: return _buildHearAboutStep(); 
-      case 5: return _buildProficiencyStep();
-      case 6: return _buildReasonStep(); // New Step
-      case 7: return _buildDailyGoalStep();
-      case 8: return _buildLoadingStep();
-      case 9: return _buildFinalAuthStep();
-      default: return Container();
-    }
-  }
-
-  // --- Step 0: Welcome Mascot ---
-  // --- Step 0: Welcome Mascot ---
-  Widget _buildIntro1() {
-    return Container(
-      key: const ValueKey(0),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Spacer(),
-          // Speech Bubble
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Text(
-              "Hello, I’m Blinky! Let’s\ncustomize your profile",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.familjenGrotesk(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-                height: 1.3,
-              ),
-            ),
-          ).animate().fadeIn().moveY(begin: 10, end: 0),
-          
-          // Speech bubble tail
-          CustomPaint(
-            painter: TrianglePainter(color: Colors.white),
-            size: const Size(20, 10),
-          ).animate().fadeIn(delay: 100.ms),
-
-          const SizedBox(height: 24),
-
-          // Mascot
-          SvgPicture.asset(
-            "assets/onboarding-1.svg",
-            height: 250,
-          ).animate().scale(delay: 200.ms, duration: 400.ms, curve: Curves.easeOutBack),
-
-          const Spacer(),
-
-          _buildPrimaryButton(
-            text: "Let’s go",
-            onPressed: _nextStep,
-          ),
-          const SizedBox(height: 32),
-        ],
-      ),
-    );
-  }
-
-  // --- Step 1: Mascot Request ---
-  Widget _buildIntro2() {
-    return Container(
-      key: const ValueKey(1),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Spacer(),
-          // Speech Bubble
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                style: GoogleFonts.familjenGrotesk(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                  height: 1.3,
-                ),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const TextSpan(text: "Answer to "),
-                  TextSpan(
-                    text: "7 questions",
-                    style: GoogleFonts.familjenGrotesk(
-                      color: const Color(0xFF2CB2FF),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const TextSpan(text: "\nbefore start"),
+                  const SizedBox(height: 10),
+                  // Hide header in step 7 (according to design usually final screens are cleaner, 
+                  // but your screenshot shows 'back' button. We'll keep it but maybe hide progress 7/7 if unrelated)
+                  // Actually the screenshot shows no 7/7 but shows back button.
+                  _buildHeader(), 
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
-          ).animate().fadeIn().moveY(begin: 10, end: 0),
-          
-          // Speech bubble tail
-          CustomPaint(
-            painter: TrianglePainter(color: Colors.white),
-            size: const Size(20, 10),
-          ).animate().fadeIn(delay: 100.ms),
+            
+            // Step Content
+            Expanded(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: _buildCurrentStep(),
+              ),
+            ),
 
-          const SizedBox(height: 24),
-
-          // Mascot
-          SvgPicture.asset(
-            "assets/onboarding-2.svg",
-            height: 250,
-          ).animate().scale(delay: 200.ms, duration: 400.ms, curve: Curves.easeOutBack),
-
-          const Spacer(),
-
-          _buildPrimaryButton(
-            text: "Continue",
-            onPressed: _nextStep,
-          ),
-          const SizedBox(height: 32),
-        ],
+            // Only show button if not in auto-transition steps (1, 2, 4, 5, 6)
+            // And Step 7 has its own buttons, so hide the main continue button
+            if (currentStep == 3) _buildContinueButton(),
+          ],
+        ),
       ),
     );
   }
 
-  // --- Step 2: Native Language ---
-  Widget _buildNativeLanguageStep() {
-    final languages = [
-      {'name': 'American English', 'countryCode': 'US'},
-      {'name': 'German', 'countryCode': 'DE'},
-      {'name': 'Chinese', 'countryCode': 'CN'},
-      {'name': 'Korean', 'countryCode': 'KR'},
-      {'name': 'French', 'countryCode': 'FR'},
-      {'name': 'Arabic', 'countryCode': 'SA'},
-      {'name': 'Portugal', 'countryCode': 'PT'},
-      {'name': 'Italian', 'countryCode': 'IT'},
-      {'name': 'Russian', 'countryCode': 'RU'},
-      {'name': 'Japanese', 'countryCode': 'JP'},
-      {'name': 'Hindi', 'countryCode': 'IN'},
-    ];
-    return _buildQuestionStep(
-      stepIndex: 2,
-      question: "Which language do you speak fluently?",
-      options: languages,
-      selectedValue: _nativeLanguage,
-      onSelect: (val) => setState(() => _nativeLanguage = val),
-    );
-  }
-
-  // --- Step 3: Target Language ---
-  Widget _buildLearningLanguageStep() {
-    final languages = [
-      {'name': 'Twi (Ghana)', 'countryCode': 'GH'},
-      {'name': 'Ga (Ghana)', 'countryCode': 'GH'},
-    ];
-    return _buildQuestionStep(
-      stepIndex: 3,
-      question: "Which language would you like to learn?",
-      options: languages,
-      selectedValue: _learningLanguage,
-      onSelect: (val) => setState(() => _learningLanguage = val),
-    );
-  }
-
-  // --- Step 4: Hear About Us (3/7) ---
-  Widget _buildHearAboutStep() {
-    final options = [
-      {'name': 'YouTube'},
-      {'name': 'Google Search'},
-      {'name': 'Twitter'},
-      {'name': 'Instagram'},
-      {'name': 'Website'},
-      {'name': 'Article / Blog'},
-      {'name': 'Friends'},
-    ];
-    return _buildQuestionStep(
-      stepIndex: 4,
-      question: "How did you hear about us?",
-      options: options,
-      selectedValue: _hearAboutUs,
-      onSelect: (val) => setState(() => _hearAboutUs = val),
-    );
-  }
-
-  // --- Step 5: Proficiency (4/7) ---
-  Widget _buildProficiencyStep() {
-    final language = _learningLanguage?.split(' ').first ?? "target language"; 
-    
-    final levels = [
-      {'name': 'Not at all', 'icon': '😐'},
-      {'name': 'A little', 'icon': '😛'},
-      {'name': 'Very well', 'icon': '❤️'},
-      {'name': 'Like a native', 'icon': '👑'},
-    ];
-
-    return _buildGridStep(
-      stepIndex: 5,
-      question: "How well do you speak $language?",
-      options: levels,
-      selectedValue: _proficiencyLevel,
-      onSelect: (val) => setState(() => _proficiencyLevel = val),
-    );
-  }
-
-
-
-  // --- Step 6: Reason for Learning (5/7) ---
-  Widget _buildReasonStep() {
-    final language = _learningLanguage?.split(' ').first ?? "target language";
-
-    final reasons = [
-      {'name': 'For work', 'icon': '🖥️'},
-      {'name': 'For studying', 'icon': '📗'},
-      {'name': 'For travel', 'icon': '🚗'},
-      {'name': 'Hobby', 'icon': '💬'},
-      {'name': 'For fun', 'icon': '👍'},
-      {'name': 'To make friends', 'icon': '😃'},
-    ];
-
-    return _buildGridStep(
-      stepIndex: 6,
-      question: "Why are you learning $language?",
-      options: reasons,
-      selectedValue: _learningReason,
-      onSelect: (val) => setState(() => _learningReason = val),
-    );
-  }
-
-  // --- Grid Step Builder (Reusable) ---
-  Widget _buildGridStep({
-    required int stepIndex,
-    required String question,
-    required List<Map<String, dynamic>> options,
-    required String? selectedValue,
-    required Function(String) onSelect,
-  }) {
-    return Column(
-      key: ValueKey(stepIndex),
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Top Bar
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
-                onPressed: () {
-                  if (_currentStep > 0) {
-                    setState(() => _currentStep--);
-                  } else {
-                    Navigator.pop(context);
-                  }
-                },
+        if (currentStep > 1)
+          GestureDetector(
+            onTap: _previousStep,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF7F7F7),
+                borderRadius: BorderRadius.circular(20),
               ),
-              Text(
-                "${stepIndex - 1}/7",
-                style: GoogleFonts.familjenGrotesk(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
-          ),
-        ),
-        
-        // Progress Bar
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: (stepIndex - 1) / 7.0,
-              backgroundColor: const Color(0xFFF3F4F6),
-              valueColor: const AlwaysStoppedAnimation(Color(0xFF59C8FF)),
-              minHeight: 8,
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 24),
-
-        // Mascot + Question Bubble
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              // Mascot
-              SvgPicture.asset(
-                "assets/onboarding-2.svg",
-                height: 100,
-              ),
-              const SizedBox(width: 12),
-              
-              // Speech Bubble
-              Expanded(
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFE5E5E5)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        question,
-                        style: GoogleFonts.familjenGrotesk(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
+              child: const Row(
+                children: [
+                  Icon(Icons.chevron_left, size: 20, color: Colors.grey),
+                  SizedBox(width: 4),
+                  Text(
+                    "back",
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      color: Color(0xFF757575),
+                      fontWeight: FontWeight.w500,
                     ),
-                    Positioned(
-                      left: -10,
-                      bottom: 20,
-                      child: CustomPaint(
-                        painter: TrianglePainter(color: Colors.white, isLeft: true, borderColor: const Color(0xFFE5E5E5)),
-                        size: const Size(12, 12),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ).animate().fadeIn().moveY(begin: 10, end: 0),
-
-        const SizedBox(height: 24),
-
-        // Grid Options
-        Expanded(
-          child: GridView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1.1, // Square-ish
-            ),
-            itemCount: options.length,
-            itemBuilder: (context, index) {
-              final option = options[index];
-              final label = option['name'];
-              final icon = option['icon'];
-              final isSelected = selectedValue == label;
-              
-              return GestureDetector(
-                onTap: () => onSelect(label),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFFDFFFD6) : Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected ? const Color(0xFF88D870) : const Color(0xFFE5E5E5),
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: isSelected ? const Color(0xFF88D870) : const Color(0xFFE5E5E5),
-                        offset: const Offset(0, 4),
-                        blurRadius: 0,
-                      ),
-                    ],
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        icon,
-                        style: const TextStyle(fontSize: 32),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        label,
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.familjenGrotesk(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: isSelected ? const Color(0xFF5BA83B) : Colors.black87,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        
-        const SizedBox(height: 24),
-
-        // Continue Button
-        Padding(
-          padding: const EdgeInsets.all(24),
-          child: _buildPrimaryButton(
-            text: "Continue", 
-            onPressed: selectedValue != null ? _nextStep : () {}, 
-          ),
-        ),
-      ],
-    );
-  }
-
-  // --- Step 7: Daily Goal (6/7) ---
-  Widget _buildDailyGoalStep() {
-    final options = [
-      {'duration': 5, 'label': 'Habit', 'color': Colors.transparent},
-      {'duration': 10, 'label': 'Focus', 'color': const Color(0xFFDFFFD6)}, 
-      {'duration': 15, 'label': 'Routine', 'color': Colors.transparent},
-      {'duration': 20, 'label': 'Discipline', 'color': Colors.transparent},
-    ];
-
-    return Column(
-      key: const ValueKey(7),
-      children: [
-        // Top Bar
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
-                onPressed: () {
-                  if (_currentStep > 0) {
-                    setState(() => _currentStep--);
-                  } else {
-                    Navigator.pop(context);
-                  }
-                },
+                ],
               ),
-              Text(
-                "6/7", // Step 6 of 7
-                style: GoogleFonts.familjenGrotesk(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Progress Bar
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: 6 / 7.0,
-              backgroundColor: const Color(0xFFF3F4F6),
-              valueColor: const AlwaysStoppedAnimation(Color(0xFF59C8FF)),
-              minHeight: 8,
             ),
+          )
+        else
+          SvgPicture.asset(
+            'assets/images/afrolingo-logo.svg',
+            height: 28,
           ),
-        ),
-
-        const SizedBox(height: 24),
-
-        // Mascot + Question Bubble
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              // Mascot
-              SvgPicture.asset(
-                "assets/onboarding-2.svg",
-                height: 100,
-              ),
-              const SizedBox(width: 12),
-              
-              // Speech Bubble
-              Expanded(
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFE5E5E5)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        "How long do you want to learn daily?",
-                        style: GoogleFonts.familjenGrotesk(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: -10,
-                      bottom: 20,
-                      child: CustomPaint(
-                        painter: TrianglePainter(color: Colors.white, isLeft: true, borderColor: const Color(0xFFE5E5E5)),
-                        size: const Size(12, 12),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ).animate().fadeIn().moveY(begin: 10, end: 0),
-
-        const SizedBox(height: 24),
-
-        // Options List
-        Expanded(
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            itemCount: options.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 16),
-            itemBuilder: (context, index) {
-              final option = options[index];
-              final duration = option['duration'] as int;
-              final label = option['label'] as String;
-              final isSelected = _selectedDuration == duration;
-              
-              return GestureDetector(
-                onTap: () => setState(() => _selectedDuration = duration),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                  decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFFDFFFD6) : Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected ? const Color(0xFF88D870) : const Color(0xFFE5E5E5),
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: isSelected ? const Color(0xFF88D870) : const Color(0xFFE5E5E5),
-                        offset: const Offset(0, 4),
-                        blurRadius: 0,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        "$duration minutes",
-                        style: GoogleFonts.familjenGrotesk(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        label,
-                        style: GoogleFonts.familjenGrotesk(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: isSelected ? const Color(0xFF5BA83B) : Colors.grey.shade500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-
-        const SizedBox(height: 24),
-
-        // Continue Button
-        Padding(
-          padding: const EdgeInsets.all(24),
-          child: _buildPrimaryButton(
-            text: "Continue", 
-            onPressed: () => _nextStep(), 
-          ),
-        ),
-      ],
-    );
-  }
-
-
-  // --- Step 6: Loading ---
-  // --- Step 8: Loading/Customizing (7/7) ---
-  Widget _buildLoadingStep() {
-    return Column(
-      key: const ValueKey(8),
-      children: [
-        // Top Bar
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
-                onPressed: () {
-                  if (_currentStep > 0) {
-                    setState(() => _currentStep--);
-                  } else {
-                    Navigator.pop(context);
-                  }
-                },
-              ),
-              Text(
-                "7/7",
-                style: GoogleFonts.familjenGrotesk(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Progress Bar (Full)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: const LinearProgressIndicator(
-              value: 1.0,
-              backgroundColor: Color(0xFFF3F4F6),
-              valueColor: AlwaysStoppedAnimation(Color(0xFF59C8FF)),
-              minHeight: 8,
-            ),
-          ),
-        ),
-
-        // Main Content (Centered)
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Bubble (Top)
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 48),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFE5E5E5)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        "Now we are customizing your profile, wait...",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.familjenGrotesk(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    // Triangle Pointing Down (Approximation with rotated square)
-                    Positioned(
-                      bottom: -6,
-                      child: Transform.rotate(
-                        angle: 0.785398, // 45 degrees
-                        child: Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: const Border(
-                              bottom: BorderSide(color: Color(0xFFE5E5E5)),
-                              right: BorderSide(color: Color(0xFFE5E5E5)),
-                            ),
-                            boxShadow: [
-                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 4,
-                                offset: const Offset(2, 2),
-                              ),
-                            ]
-                          ),
-                        ),
-                      ),
-                    ),
-                     // Cover top of triangle to blend
-                    Positioned(
-                      bottom: 0,
-                      child: Container(
-                        width: 20, 
-                        height: 2, 
-                        color: Colors.white
-                      ),
-                    ),
-                  ],
-                ),
-              ).animate().fadeIn().moveY(begin: -10, end: 0),
-
-              const SizedBox(height: 24),
-
-              // Mascot
-              _buildMascot(size: 140)
-                  .animate(onPlay: (c) => c.repeat(reverse: true))
-                  .scale(begin: const Offset(1, 1), end: const Offset(1.05, 1.05), duration: 1.seconds),
-              
-              const SizedBox(height: 32),
-
-              Text(
-                "LOADING...",
-                style: GoogleFonts.familjenGrotesk(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black54,
-                  letterSpacing: 1.2,
-                ),
-              ).animate(onPlay: (c) => c.repeat())
-               .fadeIn(duration: 800.ms)
-               .then()
-               .fadeOut(duration: 800.ms),
-            ],
-          ),
-        ),
-
-        // Finish Button
-        Padding(
-          padding: const EdgeInsets.all(24),
-          child: _buildPrimaryButton(
-            text: "Finish", 
-            onPressed: () {
-               // Proceed to Final Auth or Home
-               _nextStep();
-            }, 
-          ),
-        ),
-      ],
-    );
-  }
-
-  // --- Step 7: Final Sign Up ---
-  Widget _buildFinalAuthStep() {
-    return Container(
-      key: const ValueKey(9),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Spacer(),
-          
-          // Mascot
-          _buildMascot(size: 160).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
-          
-          const SizedBox(height: 40),
-          
+        if (currentStep != 7) // Hide progress counter on the last step as per usual design patterns or screenshot analysis
           Text(
-            "Save your journey",
-            textAlign: TextAlign.center,
-            style: GoogleFonts.familjenGrotesk(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
+            '$currentStep/7',
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
               color: Colors.black,
             ),
-          ).animate().fadeIn(delay: 200.ms),
-          
-          const SizedBox(height: 16),
-          
-          Text(
-            "Don’t lose your unlocked levels and claimed rewards by just Signing-Up in Mieo",
-            textAlign: TextAlign.center,
-            style: GoogleFonts.familjenGrotesk(
-              fontSize: 16,
-              color: Colors.black54,
-              height: 1.5,
-            ),
-          ).animate().fadeIn(delay: 400.ms),
-          
-          const SizedBox(height: 60),
-          
-          // Google Sign Up Button (3D White)
-          GestureDetector(
-            onTap: () {
-                // Handle Google Sign Up
-            },
-            child: Container(
-              width: double.infinity,
-              height: 56,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE5E5E5), width: 2),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0xFFE5E5E5),
-                    offset: Offset(0, 4),
-                    blurRadius: 0,
-                  ),
-                ],
+          ),
+      ],
+    );
+  }
+
+  Widget _buildStep1() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        key: const ValueKey(1),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: const TextSpan(
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 28,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+                height: 1.2,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SvgPicture.asset("assets/google.svg", width: 24),
-                  const SizedBox(width: 12),
-                  Text(
-                    "Sign Up with Google",
-                    style: GoogleFonts.familjenGrotesk(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+              children: [
+                TextSpan(text: "Which "),
+                TextSpan(
+                  text: "Ghanaian",
+                  style: TextStyle(
+                    color: Color(0xFF007A7A),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                TextSpan(text: " language\nwould you like to learn?"),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          Expanded(
+            child: ListView(
+              physics: const BouncingScrollPhysics(),
+              children: [
+                _buildLanguageItem(0, "TWI (ASANTI)", isComingSoon: false),
+                _buildLanguageItem(1, "GA", isComingSoon: false),
+                _buildDivider("Coming Soon"),
+                ...["EWE", "FANTI", "DAGOMBA", "FRAFRA", "BONO"]
+                    .asMap()
+                    .entries
+                    .map((entry) => _buildLanguageItem(entry.key + 2, entry.value, isComingSoon: true))
+                    .toList(),
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStep2() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        key: const ValueKey(2),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Now let’s find your level of\nfluency in $selectedLanguage.",
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 28,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 32),
+          Expanded(
+            child: ListView(
+              physics: const BouncingScrollPhysics(),
+              children: [
+                _buildFluencyItem(
+                  0,
+                  "From Scratch",
+                  "A1 Course",
+                  "I only know a few words in $selectedLanguage and am essentially starting from scratch.",
+                ),
+                _buildFluencyItem(
+                  1,
+                  "Beginner",
+                  "A2 Course",
+                  "I can speak a little $selectedLanguage and know some of the basics, but am still a beginner.",
+                ),
+                _buildFluencyItem(
+                  2,
+                  "Intermediate",
+                  "B1 course",
+                  "I can order for food or read a menu in $selectedLanguage, but am still improving",
+                ),
+                _buildFluencyItem(
+                  3,
+                  "Advanced",
+                  "B2 course",
+                  "I'm feeling more comfortable speaking $selectedLanguage in public, but still need practice",
+                ),
+                _buildFluencyItem(
+                  4,
+                  "Nearly Fluent",
+                  "C1 course",
+                  "I can watch an $selectedLanguage TV show without needing subtitles",
+                ),
+                const SizedBox(height: 32),
+                const Center(
+                  child: Text(
+                    "You can always switch to another level later, so\nno stress.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      color: Color(0xFF757575),
+                      fontSize: 13,
+                      height: 1.5,
                     ),
                   ),
-                ],
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStep3() {
+    String title = "";
+    String description = "";
+
+    switch (selectedFluencyIndex) {
+      case 0:
+        title = "Starting from scratch?";
+        description = "We’ll be adding more support for people like you who are just getting started soon.\n\nIn the meantime, you’re welcome to try us out, but should know that you may be swimming in the deep end.";
+        break;
+      case 1:
+        title = "Brushing up the basics?";
+        description = "AfroLingo is designed to help you master the fundamentals. You'll progress quickly through the basics and build a strong foundation for more complex conversations.";
+        break;
+      case 2:
+        title = "Strengthening your skills?";
+        description = "You've got a good start! Our lessons will push you to expand your vocabulary and understand the nuances of the language, helping you sound more natural.";
+        break;
+      case 3:
+        title = "Perfecting your flow?";
+        description = "We'll challenge you with more complex sentence structures and cultural context to help you bridge the gap between intermediate and advanced fluency.";
+        break;
+      case 4:
+        title = "Maintaining your mastery?";
+        description = "Even experts benefit from practice. Our advanced modules provide the perfect environment to refine your accent and catch those last few tricky idioms.";
+        break;
+      default:
+        title = "Starting from scratch?";
+        description = "We’ll be adding more support for people like you who are just getting started soon.\n\nIn the meantime, you’re welcome to try us out, but should know that you may be swimming in the deep end.";
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        key: const ValueKey(3),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 28,
+                fontWeight: FontWeight.w400,
+                color: Colors.black,
+                height: 1.2,
+              ),
+              children: [
+                const TextSpan(
+                  text: "Afrolingo ",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const TextSpan(text: "is best for people\nwho want know the basics of\n"),
+                TextSpan(
+                  text: selectedLanguage,
+                  style: const TextStyle(fontWeight: FontWeight.w400),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 40),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFF007A7A),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 16,
+                    color: Colors.white,
+                    height: 1.6,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStep4() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        key: const ValueKey(4),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Why are you excited about\nlearning $selectedLanguage?",
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 28,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 32),
+          Expanded(
+            child: ListView(
+              physics: const BouncingScrollPhysics(),
+              children: [
+                _buildSimpleOptionItem(0, "Living in Ghana"),
+                _buildSimpleOptionItem(1, "To speak with friends"),
+                _buildSimpleOptionItem(2, "For my work"),
+                _buildSimpleOptionItem(3, "Visiting Ghana"),
+                _buildSimpleOptionItem(4, "Just for fun"),
+                const SizedBox(height: 48),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Text(
+                      "This helps us personalize the learning to better fit\nyour goals",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        color: Colors.grey[600],
+                        fontSize: 14,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildStep5() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        key: const ValueKey(5),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "What’s your age?",
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 28,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 32),
+          Expanded(
+            child: ListView(
+              physics: const BouncingScrollPhysics(),
+              children: [
+                _buildSimpleOptionItem(0, "Under 25"),
+                _buildSimpleOptionItem(1, "25-40"),
+                _buildSimpleOptionItem(2, "40-60"),
+                _buildSimpleOptionItem(3, "over 60"),
+                const SizedBox(height: 48),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Text(
+                      "This help us suggest better topics and scenarios\nfor you to practice.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        color: Colors.grey[600],
+                        fontSize: 14,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildStep6() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        key: const ValueKey(6),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Last thing, how did you hear\nabout Afrolingo?",
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 28,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 32),
+          Expanded(
+            child: ListView(
+              physics: const BouncingScrollPhysics(),
+              children: [
+                _buildSimpleOptionItem(0, "Friends / Family"),
+                _buildSimpleOptionItem(1, "Facebook"),
+                _buildSimpleOptionItem(2, "TikTok"),
+                _buildSimpleOptionItem(3, "News / Press"),
+                _buildSimpleOptionItem(4, "Youtube"),
+                _buildSimpleOptionItem(5, "Google Search"),
+                const SizedBox(height: 48),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Text(
+                      "This helps us improve how we spread the word\nand reach more people.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        color: Colors.grey[600],
+                        fontSize: 14,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+
+  Widget _buildSimpleOptionItem(int index, String title) {
+    bool isSelected = selectedOptionIndex == index;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: isSelected ? const Color(0xFF1A1A1A) : Colors.white,
+        borderRadius: BorderRadius.circular(24), // Highly rounded like design
+        border: Border.all(
+          color: isSelected ? Colors.white : const Color(0xFFF0F0F0),
+          width: 1.2,
+        ),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: isSelected ? Colors.white : Colors.black87,
+          ),
+        ),
+        trailing: Icon(
+          Icons.chevron_right,
+          color: isSelected ? Colors.white : Colors.black87,
+          size: 24,
+        ),
+        onTap: () async {
+          setState(() {
+            selectedOptionIndex = index;
+          });
+          // Auto-transition after selection delay
+          await Future.delayed(const Duration(milliseconds: 800));
+          if (mounted) _nextStep();
+        },
+      ),
+    );
+  }
+  Widget _buildStep7() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        key: const ValueKey(7),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Independence Arch Image
+          Container(
+            width: double.infinity,
+            height: 200,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              image: const DecorationImage(
+                image: AssetImage('assets/images/step-7-image.png'),
+                fit: BoxFit.cover,
               ),
             ),
-          ).animate().fadeIn(delay: 600.ms).moveY(begin: 10, end: 0),
-          
-          const SizedBox(height: 20),
-          
-          // Create Account Button (3D Blue)
-          GestureDetector(
+          ),
+          const SizedBox(height: 32),
+          Text(
+            "Great! You are about to start a\ngreat journey in learning $selectedLanguage.",
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 24,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+              height: 1.3,
+            ),
+          ),
+          const Spacer(),
+          // Sign Up Buttons
+          _buildSocialButton(
+            label: "Sign up with Google",
+            iconPath: "assets/icons/google.png",
+            isOutlined: true,
+            onTap: () {},
+          ),
+          const SizedBox(height: 16),
+          _buildSocialButton(
+            label: "Sign up with Apple",
+            icon: Icons.apple,
+            isDark: true,
+            onTap: () {},
+          ),
+          const SizedBox(height: 16),
+          _buildSocialButton(
+            label: "Sign up with Email",
+            icon: Icons.email_outlined,
+            isPrimary: true,
             onTap: () {
-               Navigator.pushReplacement(
-                context, 
+              Navigator.push(
+                context,
                 MaterialPageRoute(builder: (context) => const SignupScreen()),
               );
             },
-            child: Container(
-              width: double.infinity,
-              height: 56,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2CB2FF),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0xFF1E9AD8),
-                    offset: Offset(0, 4),
-                    blurRadius: 0,
-                  ),
-                ],
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                "Create Account",
-                style: GoogleFonts.familjenGrotesk(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ).animate().fadeIn(delay: 800.ms).moveY(begin: 10, end: 0),
-          
-          const Spacer(),
+          ),
+          const SizedBox(height: 48),
         ],
       ),
     );
   }
 
-  // --- Question Step Builder (Reusable) ---
-  Widget _buildQuestionStep({
-    required int stepIndex,
-    required String question,
-    required List<Map<String, dynamic>> options,
-    required String? selectedValue,
-    required Function(String) onSelect,
+  Widget _buildSocialButton({
+    required String label,
+    IconData? icon,
+    String? iconPath,
+    bool isOutlined = false,
+    bool isDark = false,
+    bool isPrimary = false,
+    required VoidCallback onTap,
   }) {
-    return Column(
-      key: ValueKey(stepIndex),
-      children: [
-        // Top Bar
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
-                onPressed: () {
-                  if (_currentStep > 0) {
-                    setState(() => _currentStep--);
-                  } else {
-                    Navigator.pop(context);
-                  }
-                },
-              ),
-              Text(
-                "${stepIndex - 1}/7",
-                style: GoogleFonts.familjenGrotesk(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
+    Color bgColor = Colors.white;
+    Color textColor = Colors.black;
+    Color borderColor = const Color(0xFFE0E0E0);
+
+    if (isDark) {
+      bgColor = Colors.black;
+      textColor = Colors.white;
+      borderColor = Colors.black;
+    } else if (isPrimary) {
+      bgColor = const Color(0xFF007A7A);
+      textColor = Colors.white;
+      borderColor = const Color(0xFF007A7A);
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 56,
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(
+            color: borderColor,
+            width: 1,
           ),
         ),
-        
-        // Progress Bar
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: (stepIndex - 1) / 7.0,
-              backgroundColor: const Color(0xFFF3F4F6),
-              valueColor: const AlwaysStoppedAnimation(Color(0xFF59C8FF)),
-              minHeight: 8,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icon != null)
+              Icon(icon, color: textColor, size: 24)
+            else if (iconPath != null)
+              if (iconPath.endsWith('.svg'))
+                SvgPicture.asset(iconPath, width: 24, height: 24)
+              else
+                Image.asset(iconPath, width: 24, height: 24),
+            const SizedBox(width: 12),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: textColor,
+              ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildLanguageItem(int index, String title, {required bool isComingSoon}) {
+    bool isSelected = selectedOptionIndex == index;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: isSelected ? const Color(0xFF1A1A1A) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isSelected ? Colors.white : const Color(0xFFEEEEEE),
+          width: 1.5,
+        ),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Flag.fromCode(
+          FlagsCode.GH,
+          height: 18,
+          width: 24,
+          fit: BoxFit.fill,
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: isComingSoon 
+                ? const Color(0xFFBDBDBD)
+                : (isSelected ? Colors.white : Colors.black54),
+            letterSpacing: 0.5,
           ),
         ),
+        trailing: Icon(
+          Icons.chevron_right,
+          color: isComingSoon 
+              ? const Color(0xFFE0E0E0)
+              : (isSelected ? Colors.white : Colors.black45),
+          size: 24,
+        ),
+        onTap: isComingSoon
+            ? null
+            : () async {
+                setState(() {
+                  selectedOptionIndex = index;
+                  if (currentStep == 1) {
+                    selectedLanguage = title.split(' ')[0];
+                  }
+                });
+                await Future.delayed(const Duration(milliseconds: 800));
+                if (mounted) _nextStep();
+              },
+      ),
+    );
+  }
 
-        const SizedBox(height: 24),
-
-        // Mascot + Question Bubble
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              // Mascot
-              SvgPicture.asset(
-                "assets/onboarding-2.svg",
-                height: 100,
-              ),
-              const SizedBox(width: 12),
-              
-              // Speech Bubble
-              Expanded(
-                child: Stack(
-                  clipBehavior: Clip.none,
+  Widget _buildFluencyItem(int index, String title, String course, String description) {
+    bool isSelected = selectedOptionIndex == index;
+    return GestureDetector(
+      onTap: () async {
+        setState(() {
+          selectedOptionIndex = index;
+        });
+        await Future.delayed(const Duration(milliseconds: 800));
+        if (mounted) _nextStep();
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF1A1A1A) : Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isSelected ? Colors.white : const Color(0xFFF0F0F0),
+            width: 1.5,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFE5E5E5)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        question,
-                        style: GoogleFonts.familjenGrotesk(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected ? Colors.white : Colors.black87,
                       ),
                     ),
-                    Positioned(
-                      left: -10,
-                      bottom: 20,
-                      child: CustomPaint(
-                        painter: TrianglePainter(color: Colors.white, isLeft: true, borderColor: const Color(0xFFE5E5E5)),
-                        size: const Size(12, 12),
+                    const SizedBox(height: 2),
+                    Text(
+                      course,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: isSelected ? Colors.white.withOpacity(0.6) : const Color(0xFFB0B0B0),
                       ),
                     ),
                   ],
                 ),
+                Icon(
+                  Icons.chevron_right,
+                  color: isSelected ? Colors.white : Colors.grey,
+                  size: 28,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isSelected ? Colors.white.withOpacity(0.1) : const Color(0xFFF9F9F9),
+                borderRadius: BorderRadius.circular(12),
               ),
-            ],
-          ),
-        ).animate().fadeIn().moveY(begin: 10, end: 0),
-
-        const SizedBox(height: 24),
-        
-        // Options List
-        Expanded(
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            itemCount: options.length,
-            separatorBuilder: (c, i) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final option = options[index];
-              final label = option['name'];
-              final isSelected = selectedValue == label;
-              
-              return GestureDetector(
-                onTap: () => onSelect(label),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), // Reduced vertical padding slightly
-                  decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFFDFFFD6) : Colors.white, 
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected ? const Color(0xFF88D870) : const Color(0xFFE5E5E5),
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      // 3D Shadow effect
-                      BoxShadow(
-                        color: isSelected ? const Color(0xFF88D870) : const Color(0xFFE5E5E5),
-                        offset: const Offset(0, 4),
-                        blurRadius: 0,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      // Flag/Icon
-                      if (option.containsKey('countryCode') || option.containsKey('flag'))
-                        Container(
-                          width: 48, // Wider container
-                          height: 38, // Taller container
-                          margin: const EdgeInsets.only(right: 16),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.grey.shade100,
-                            // border: Border.all(color: Colors.black.withOpacity(0.05)),
-                          ),
-                           alignment: Alignment.center,
-                           clipBehavior: Clip.antiAlias,
-                           child: Flag.fromString(
-                             option['countryCode'] ?? 'US',
-                             height: 38,
-                             width: 48,
-                             fit: BoxFit.cover,
-                             borderRadius: 8,
-                           ),
-                        ),
-                      Text(
-                        label,
-                        style: GoogleFonts.familjenGrotesk(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: isSelected ? const Color(0xFF5BA83B) : Colors.black87,
-                        ),
-                      ),
-                    ],
-                  ),
+              child: Text(
+                description,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  color: isSelected ? Colors.white : Colors.black54,
+                  height: 1.4,
                 ),
-              );
-            },
-          ),
-        ),
-        
-        const SizedBox(height: 24),
-        // Continue Button
-        Padding(
-          padding: const EdgeInsets.all(24),
-          child: _buildPrimaryButton(
-            text: "Continue", 
-            onPressed: selectedValue != null ? _nextStep : () {}, 
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSelectionStep({
-    required Key key,
-    required String title,
-    required List<String> options,
-    required String? selectedOption,
-    required Function(String) onSelect,
-    required VoidCallback onNext,
-    bool useListView = false,
-  }) {
-    return Column(
-      key: key,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Text(
-            title,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.familjenGrotesk(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-        ),
-        
-        Expanded(
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            itemCount: options.length,
-            separatorBuilder: (c, i) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final option = options[index];
-              final isSelected = selectedOption == option;
-              
-              return GestureDetector(
-                onTap: () => onSelect(option),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected ? const Color(0xFF59C8FF) : Colors.transparent,
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        offset: const Offset(0, 2),
-                        blurRadius: 8,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        option,
-                        style: GoogleFonts.familjenGrotesk(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const Spacer(),
-                      // Radio Circle
-                      Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: isSelected ? const Color(0xFF59C8FF) : Colors.grey.shade300,
-                            width: 2,
-                          ),
-                          color: isSelected ? const Color(0xFF59C8FF) : Colors.transparent,
-                        ),
-                        child: isSelected 
-                            ? const Icon(Icons.check, size: 16, color: Colors.white)
-                            : null,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        
-        Padding(
-          padding: const EdgeInsets.all(24),
-          child: _buildPrimaryButton(
-            text: "Next", 
-            onPressed: selectedOption != null ? onNext : () {}, // Disable loosely if null
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPrimaryButton({required String text, required VoidCallback onPressed}) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: double.infinity,
-        height: 56,
-        decoration: BoxDecoration(
-          color: const Color(0xFF2CB2FF),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF1E9AD8), // Darker blue shadow
-              offset: const Offset(0, 4),
-              blurRadius: 0,
+              ),
             ),
           ],
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          text,
-          style: GoogleFonts.familjenGrotesk(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
         ),
       ),
     );
   }
 
-  Widget _buildMascot({double size = 150}) {
-    // Placeholder Mieo Mascot
-    return Center(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: Colors.white, // White background for the mascot
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            )
-          ],
-        ),
-        child: ClipOval(
-          child: Icon(Icons.pets, size: size * 0.6, color: const Color(0xFF59C8FF)),
-        ), 
+  Widget _buildDivider(String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: Row(
+        children: [
+          const Expanded(child: Divider(color: Color(0xFFEEEEEE))),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                color: Colors.grey,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const Expanded(child: Divider(color: Color(0xFFEEEEEE))),
+        ],
       ),
     );
   }
 }
-
-class TrianglePainter extends CustomPainter {
-  final Color color;
-  final bool isLeft;
-  final Color? borderColor;
-
-  TrianglePainter({required this.color, this.isLeft = false, this.borderColor});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-    
-    final borderPaint = Paint()
-      ..color = borderColor ?? Colors.transparent
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
-
-    final path = Path();
-    if (isLeft) {
-      // Pointing left
-      path
-        ..moveTo(size.width, 0)
-        ..lineTo(0, size.height / 2)
-        ..lineTo(size.width, size.height)
-        ..close();
-    } else {
-      // Pointing down (default)
-      path
-        ..moveTo(0, 0)
-        ..lineTo(size.width / 2, size.height)
-        ..lineTo(size.width, 0)
-        ..close();
-    }
-
-    canvas.drawPath(path, paint);
-    if (borderColor != null) {
-        // Simple lines for border effect on triangle not perfect but works for bubble tail
-       if (isLeft) {
-          canvas.drawLine(Offset(size.width, 0), Offset(0, size.height/2), borderPaint);
-          canvas.drawLine(Offset(0, size.height/2), Offset(size.width, size.height), borderPaint);
-       }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-  // --- Grid Step Builder (For Proficiency 4/7) ---
-

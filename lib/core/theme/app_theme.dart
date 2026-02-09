@@ -20,8 +20,9 @@ class AppTheme {
       surface: cardColor,
       background: backgroundColor,
     ),
-    // Set default font family
-    textTheme: GoogleFonts.familjenGroteskTextTheme(ThemeData.dark().textTheme),
+    // Set Poppins as the default font family
+    fontFamily: 'Poppins',
+    textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'Poppins'),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -37,6 +38,8 @@ class AppTheme {
       seedColor: primaryColor,
       brightness: Brightness.light,
     ),
-     textTheme: GoogleFonts.familjenGroteskTextTheme(ThemeData.light().textTheme),
+    // Set Poppins as the default font family
+    fontFamily: 'Poppins',
+    textTheme: ThemeData.light().textTheme.apply(fontFamily: 'Poppins'),
   );
 }

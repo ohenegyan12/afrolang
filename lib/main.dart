@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:languageapp/core/theme/app_theme.dart';
 import 'package:languageapp/features/auth/screens/splash_screen.dart';
-import 'package:languageapp/features/home/home_screen.dart';
+
 // import 'package:provider/provider.dart'; // Will use later for state management
 
 void main() {
