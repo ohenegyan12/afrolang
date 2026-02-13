@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:languageapp/features/home/widgets/welcome_modal.dart';
@@ -5,6 +6,7 @@ import 'package:languageapp/features/scenario/screens/scenario_page.dart';
 import 'package:languageapp/features/home/widgets/menu_sheet.dart';
 import 'package:languageapp/features/scenario/screens/scenario_detail_screen.dart';
 import 'package:languageapp/features/padiman/screens/padiman_screen.dart';
+import 'package:languageapp/features/scenario/screens/create_scenario_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool showWelcomeModal;
@@ -20,6 +22,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  DateTime _selectedProgressMonth = DateTime(2026, 2);
 
   @override
   void initState() {
@@ -112,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         return const ScenarioPage();
       case 3:
-        return const Center(child: Text("Progress Page Coming Soon"));
+        return _buildProgressContent();
       default:
         return _buildHomeContent();
     }
@@ -217,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _buildScenarioCard(
                           context,
                           width: 320,
-                          imageUrl: 'assets/images/coffee-scenario.jpg',
+                          imageUrl: 'assets/images/lapping-butre-1936882_640.jpg',
                           duration: '5 min',
                           title: 'Order a coffee',
                           description: 'Get a cup at your local\ncoffee shop.',
@@ -228,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _buildScenarioCard(
                           context,
                           width: 320,
-                          imageUrl: 'assets/images/shopping-scenario.jpg',
+                          imageUrl: 'assets/images/pexels-clothes-1839935_640.jpg',
                           duration: '7 min',
                           title: 'A day in the life',
                           description: 'Describe your typical daily\nroutine.',
@@ -239,7 +242,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _buildScenarioCard(
                           context,
                           width: 320,
-                          imageUrl: 'assets/images/market-scenario.jpg',
+                          imageUrl: 'assets/images/helenjank-bags-6145811_640.jpg',
                           duration: '6 min',
                           title: 'At the market',
                           description: 'Buy fresh produce and\npractice bargaining.',
@@ -255,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Start your first chat card
                   GestureDetector(
                     onTap: () {
-                      // Navigate to full scenario library
+                      setState(() => _currentIndex = 1);
                     },
                     child: Container(
                       padding: const EdgeInsets.all(24),
@@ -312,7 +315,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   
                   GestureDetector(
                     onTap: () {
-                      // Navigate to create scenario
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CreateScenarioScreen(),
+                        ),
+                      );
                     },
                     child: Container(
                       padding: const EdgeInsets.all(24),
@@ -645,6 +653,565 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildProgressContent() {
+    return SafeArea(
+      child: Column(
+        children: [
+          // Custom Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Burger Menu
+                IconButton(
+                  icon: const Icon(Icons.menu, size: 28, color: Colors.black),
+                  onPressed: () {
+                    showMenuSheet(context);
+                  },
+                ),
+                
+                // Logo
+                SvgPicture.asset(
+                  'assets/images/afrolingo-logo.svg',
+                  height: 32,
+                ),
+                
+                // Streak Counter
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/icons/streak.svg',
+                        height: 20,
+                        width: 20,
+                      ),
+                      const SizedBox(width: 6),
+                      const Text(
+                        "0",
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF5D686F),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "You're on your way to conversational Twi.",
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 32,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    "Come back after a few chats to see your progress over time.",
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 18,
+                      color: Colors.black.withOpacity(0.7),
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 48),
+                  
+                  // Badges Progress Section
+                  Center(
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            const Text(
+                              "0",
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 84,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black,
+                              ),
+                            ),
+                            Text(
+                              " / 30",
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 32,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black.withOpacity(0.15),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          "badges earned",
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black.withOpacity(0.3),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Level Indicators
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE0E7FF),
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: const Text(
+                              "current level",
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF5D686F),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            "From Scratch",
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 24,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF1F1F1),
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: const Text(
+                              "next level",
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF5D686F),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            "Beginner",
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 24,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 48),
+                  
+                  // Comprehension Summary Card
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.black, width: 2),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE0E7FF),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.location_on, color: Color(0xFF6366F1)),
+                        ),
+                        const SizedBox(width: 16),
+                        const Text(
+                          "0",
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          " / 30",
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 16,
+                            color: Colors.black.withOpacity(0.2),
+                          ),
+                        ),
+                        const Spacer(),
+                        const Text(
+                          "Comprehension",
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 64),
+                  
+                  // Detailed Metrics Section
+                  Row(
+                    children: [
+                      const Icon(Icons.bar_chart, size: 18, color: Colors.black),
+                      const SizedBox(width: 8),
+                      Text(
+                        "METRICS",
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black.withOpacity(0.4),
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "Here's how you're doing on your key metric:",
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 28,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Detailed Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: Colors.black, width: 2),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black,
+                          offset: Offset(4, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "COMPREHENSION",
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 24,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.black,
+                              ),
+                            ),
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFD7DFFF),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(Icons.location_on, color: Color(0xFF6C91FF)),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          "You're given a goal in every scenario to try to complete by the end of the chat.",
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 16,
+                            color: Colors.black.withOpacity(0.7),
+                            height: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        
+                        // Progress visualization
+                        Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE0E7FF).withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: List.generate(10, (index) {
+                              bool isActive = index == 0;
+                              return Column(
+                                children: [
+                                  Container(
+                                    width: 16,
+                                    height: 16,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: isActive ? const Color(0xFF6C91FF) : Colors.black.withOpacity(0.05),
+                                      border: isActive ? Border.all(color: Colors.black, width: 1.5) : null,
+                                    ),
+                                  ),
+                                  if (isActive) 
+                                    Container(
+                                      height: 20,
+                                      width: 1,
+                                      color: Colors.black,
+                                      margin: const EdgeInsets.only(top: 4),
+                                    ),
+                                ],
+                              );
+                            }),
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 64),
+                  
+                  // Streak Section
+                  Row(
+                    children: [
+                      SvgPicture.asset(
+                        'assets/icons/streak.svg',
+                        height: 18,
+                        colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        "STREAK",
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black.withOpacity(0.4),
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "You're on a 0 day streak!",
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 28,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Calendar Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: Colors.black, width: 2),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black,
+                          offset: Offset(4, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        // Calendar Header with Nav
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "${_monthNames[_selectedProgressMonth.month]} ${_selectedProgressMonth.year}",
+                              style: const TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _selectedProgressMonth = DateTime(
+                                        _selectedProgressMonth.year,
+                                        _selectedProgressMonth.month - 1,
+                                      );
+                                    });
+                                  },
+                                  icon: const Icon(Icons.chevron_left, color: Colors.black),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _selectedProgressMonth = DateTime(
+                                        _selectedProgressMonth.year,
+                                        _selectedProgressMonth.month + 1,
+                                      );
+                                    });
+                                  },
+                                  icon: const Icon(Icons.chevron_right, color: Colors.black),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        _buildMonthCalendar(_selectedProgressMonth),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 64),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static const List<String> _monthNames = [
+    "", "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  Widget _buildMonthCalendar(DateTime date) {
+    final int daysInMonth = DateTime(date.year, date.month + 1, 0).day;
+    final int startWeekday = DateTime(date.year, date.month, 1).weekday % 7; // 0=Sun, 1=Mon...
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => Expanded(
+            child: Center(
+              child: Text(
+                day,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black.withOpacity(0.3),
+                ),
+              ),
+            ),
+          )).toList(),
+        ),
+        const SizedBox(height: 12),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 7,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+          ),
+          itemCount: daysInMonth + startWeekday,
+          itemBuilder: (context, index) {
+            if (index < startWeekday) {
+              return const SizedBox.shrink();
+            }
+            int dayNumber = index - startWeekday + 1;
+            
+            // Check if this cell is "today"
+            final now = DateTime.now();
+            bool isToday = dayNumber == now.day && 
+                           date.month == now.month && 
+                           date.year == now.year;
+                           
+            bool hasStreak = false; // Mocking streak
+
+            return Container(
+              decoration: BoxDecoration(
+                color: isToday ? const Color(0xFF6C91FF) : (hasStreak ? const Color(0xFFFFD54F) : Colors.transparent),
+                shape: BoxShape.circle,
+                border: isToday ? Border.all(color: Colors.black, width: 1.5) : null,
+              ),
+              child: Center(
+                child: Text(
+                  dayNumber.toString(),
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    fontWeight: isToday || hasStreak ? FontWeight.bold : FontWeight.w400,
+                    color: isToday ? Colors.white : (hasStreak ? Colors.black : Colors.black),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
   Widget _buildNavItemWithSvg({
     required String svgPath,
     required String label,
@@ -858,4 +1425,30 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
   }
+}
+
+class GaugePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFFFF7E6) // Very light orange/yellow
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..strokeCap = StrokeCap.round;
+
+    final center = Offset(size.width / 2, size.height);
+    final radius = size.width / 2;
+
+    // Draw the semi-circle arc
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      math.pi, // Start angle (left side)
+      math.pi, // Sweep angle (180 degrees)
+      false,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

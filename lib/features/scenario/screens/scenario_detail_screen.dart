@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'scenario_practice_screen.dart';
 
 class ScenarioDetailScreen extends StatelessWidget {
   final String title;
@@ -155,7 +156,12 @@ class ScenarioDetailScreen extends StatelessWidget {
                   // Start Button
                   GestureDetector(
                     onTap: () {
-                      // Begin scenario logic
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ScenarioPracticeScreen(scenarioTitle: title),
+                        ),
+                      );
                     },
                     child: Container(
                       width: double.infinity,
