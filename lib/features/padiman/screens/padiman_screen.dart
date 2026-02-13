@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:math' as math;
 import 'package:flag/flag.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class PadimanScreen extends StatefulWidget {
   const PadimanScreen({super.key});
@@ -13,13 +14,190 @@ class PadimanScreen extends StatefulWidget {
 class _PadimanScreenState extends State<PadimanScreen> with SingleTickerProviderStateMixin {
   bool _isListening = false;
   bool _isThinking = false;
+  bool _isFirstTime = true; // For demo purposes, we set this to true
   String _currentAiMessage = "Maakye, wo ho te sεn?";
   String _currentTranslation = "Good morning, how are you?";
+  
+  @override
+  void initState() {
+    super.initState();
+    if (_isFirstTime) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showIntroModal();
+      });
+    }
+  }
   
   // AI Settings
   double _speechSpeed = 1.0;
   bool _showTranslations = true;
   bool _autoPlay = true;
+
+  void _showIntroModal() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFCFAF7),
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(color: Colors.black, width: 2),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black,
+                offset: Offset(8, 8),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Animated Icon
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.black, width: 2),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: SvgPicture.asset(
+                  'assets/images/afro.svg',
+                  fit: BoxFit.cover,
+                ),
+              ).animate().scale(duration: 600.ms, curve: Curves.elasticOut),
+              
+              const SizedBox(height: 24),
+              
+              const Text(
+                "Meet Padiman AI",
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.black,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              const Text(
+                "Your personal Ghanaian language tutor available 24/7.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 16,
+                  color: Colors.black87,
+                  height: 1.4,
+                ),
+              ),
+              
+              const SizedBox(height: 32),
+              
+              // Feature list
+              _buildIntroFeature(
+                Icons.record_voice_over,
+                "Voice-First Practice",
+                "Practice natural conversation through real-time audio chat.",
+              ),
+              const SizedBox(height: 16),
+              _buildIntroFeature(
+                Icons.auto_awesome,
+                "Instant Corrections",
+                "Receive gentle grammar and pronunciation feedback as you talk.",
+              ),
+              const SizedBox(height: 16),
+              _buildIntroFeature(
+                Icons.translate,
+                "Smart Translations",
+                "Get live translations to help you stay in the flow.",
+              ),
+              
+              const SizedBox(height: 40),
+              
+              SizedBox(
+                width: double.infinity,
+                height: 60,
+                child: ElevatedButton(
+                  onPressed: () {
+                    setState(() => _isFirstTime = false);
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: const Text(
+                    "LET'S CHAT!",
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ).animate().fadeIn(duration: 400.ms).scale(begin: const Offset(0.9, 0.9)),
+    );
+  }
+
+  Widget _buildIntroFeature(IconData icon, String title, String description) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.black, width: 1.5),
+          ),
+          child: Icon(icon, size: 20, color: Colors.black87),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                description,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 13,
+                  color: Colors.black.withOpacity(0.6),
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 
   void _showSettingsModal() {
     showModalBottomSheet(

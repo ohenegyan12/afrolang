@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:languageapp/features/padiman/screens/padiman_screen.dart';
+import 'package:languageapp/features/scenario/screens/scenario_results_screen.dart';
 
 class ScenarioPracticeScreen extends StatefulWidget {
   final String scenarioTitle;
@@ -83,7 +83,11 @@ class _ScenarioPracticeScreenState extends State<ScenarioPracticeScreen> {
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const PadimanScreen()),
+        MaterialPageRoute(
+          builder: (context) => ScenarioResultsScreen(
+            scenarioTitle: widget.scenarioTitle,
+          ),
+        ),
       );
     }
   }

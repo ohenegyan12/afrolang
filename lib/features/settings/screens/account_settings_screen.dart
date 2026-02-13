@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:languageapp/features/auth/screens/signin_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class AccountSettingsScreen extends StatefulWidget {
   const AccountSettingsScreen({super.key});
@@ -349,8 +350,27 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                     _buildSwitch("Daily Challenges", _dailyChallenges, (val) {
                       setState(() => _dailyChallenges = val);
                     }),
-                    _buildSwitch("Practice Reminders", _practiceReminders, (val) {
-                      setState(() => _practiceReminders = val);
+                    _buildSwitch("Practice Reminders", _practiceReminders, (val) async {
+                      if (val) {
+                        // Request notification permission
+                        final status = await Permission.notification.request();
+                        if (status.isGranted) {
+                          setState(() => _practiceReminders = true);
+                        } else {
+                          // If denied, we still let them toggle but show a warning
+                          setState(() => _practiceReminders = false);
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Please enable notifications in settings to receive reminders."),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                          }
+                        }
+                      } else {
+                        setState(() => _practiceReminders = false);
+                      }
                     }),
                     const SizedBox(height: 48),
 
