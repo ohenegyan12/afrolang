@@ -22,8 +22,53 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _obscurePassword = true;
   String _phoneCode = "+31"; // Default country code
 
+  bool _hasUppercase = false;
+  bool _hasNumber = false;
+  bool _hasMinLength = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordController.addListener(_validatePassword);
+  }
+
+  void _validatePassword() {
+    final password = _passwordController.text;
+    setState(() {
+      _hasUppercase = password.contains(RegExp(r'[A-Z]'));
+      _hasNumber = password.contains(RegExp(r'[0-9]'));
+      _hasMinLength = password.length >= 8;
+    });
+  }
+
+  int get _strengthScore {
+    int score = 0;
+    if (_hasUppercase) score++;
+    if (_hasNumber) score++;
+    if (_hasMinLength) score++;
+    return score;
+  }
+
+  Color _getBarColor(int barIndex) {
+    int score = _strengthScore;
+    if (score == 0) return Colors.grey[200]!;
+    if (score == 1 && barIndex == 0) return Colors.red;
+    if (score == 2 && barIndex < 2) return Colors.orange;
+    if (score == 3 && barIndex < 3) return Colors.green;
+    return Colors.grey[200]!;
+  }
+
+  String get _strengthText {
+    int score = _strengthScore;
+    if (score == 0) return "Password requirement. Must contain:";
+    if (score == 1) return "Weak password. Must contain:";
+    if (score == 2) return "Fair password. Must contain:";
+    return "Strong password.";
+  }
+
   @override
   void dispose() {
+    _passwordController.removeListener(_validatePassword);
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneController.dispose();
@@ -137,19 +182,19 @@ class _SignupScreenState extends State<SignupScreen> {
               // Password Strength Bars
               Row(
                 children: [
-                   Expanded(child: Container(height: 4, decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(2)))),
+                   Expanded(child: Container(height: 4, decoration: BoxDecoration(color: _getBarColor(0), borderRadius: BorderRadius.circular(2)))),
                    const SizedBox(width: 8),
-                   Expanded(child: Container(height: 4, decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(2)))),
+                   Expanded(child: Container(height: 4, decoration: BoxDecoration(color: _getBarColor(1), borderRadius: BorderRadius.circular(2)))),
                    const SizedBox(width: 8),
-                   Expanded(child: Container(height: 4, decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(2)))),
+                   Expanded(child: Container(height: 4, decoration: BoxDecoration(color: _getBarColor(2), borderRadius: BorderRadius.circular(2)))),
                 ],
               ),
               const SizedBox(height: 16),
               
               // Password Requirements
-              const Text(
-                "Weak password. Must contain:",
-                style: TextStyle(
+              Text(
+                _strengthText,
+                style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -157,9 +202,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              _buildRequirement("At least 1 uppercase"),
-              _buildRequirement("At least 1 number"),
-              _buildRequirement("At least 8 character"),
+              _buildRequirement("At least 1 uppercase", _hasUppercase),
+              _buildRequirement("At least 1 number", _hasNumber),
+              _buildRequirement("At least 8 character", _hasMinLength),
 
               const SizedBox(height: 40),
 
@@ -168,16 +213,18 @@ class _SignupScreenState extends State<SignupScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: _strengthScore == 3 ? () {
                     // Navigate to profile setup
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const ProfileSetupScreen()),
                     );
-                  },
+                  } : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF007A7A),
+                    disabledBackgroundColor: const Color(0xFF007A7A).withValues(alpha: 0.5),
                     foregroundColor: Colors.white,
+                    disabledForegroundColor: Colors.white.withValues(alpha: 0.7),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(28),
@@ -417,23 +464,25 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Widget _buildRequirement(String text) {
+  Widget _buildRequirement(String text, bool isMet) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6.0),
       child: Row(
         children: [
-          Container(
-            width: 12, 
-            height: 2, 
-            color: Colors.grey[400],
-          ),
+          isMet
+              ? const Icon(Icons.check, size: 16, color: Colors.green)
+              : Container(
+                  width: 12, 
+                  height: 2, 
+                  color: Colors.grey[400],
+                ),
           const SizedBox(width: 8),
           Text(
             text,
             style: TextStyle(
               fontFamily: 'Poppins',
               fontSize: 13,
-              color: Colors.grey[500],
+              color: isMet ? Colors.green : Colors.grey[500],
             ),
           ),
         ],

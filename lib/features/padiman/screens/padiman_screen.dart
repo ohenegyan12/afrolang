@@ -569,40 +569,43 @@ class _PadimanScreenState extends State<PadimanScreen> with SingleTickerProvider
 
         // The Wave
         if (!_isThinking)
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(40, (index) {
-            double distanceFromCenter = (index - 20).abs().toDouble();
-            double heightFactor = 1.0 - (distanceFromCenter / 22);
-            double baseHeight = 15 + (heightFactor * 50);
-            
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 2.5),
-              width: 3.5,
-              height: baseHeight,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    const Color(0xFF6C91FF).withOpacity(0.4),
-                    const Color(0xFF6C91FF),
-                    const Color(0xFF6C91FF).withOpacity(0.4),
-                  ],
-                ),
-              ),
-            )
-            .animate(onPlay: (c) => _isListening ? c.repeat(reverse: true) : c.stop())
-            .scaleY(
-              begin: 0.5,
-              end: 1.8,
-              duration: (400 + (index % 5) * 100).ms,
-              delay: (index * 20).ms,
-              curve: Curves.easeInOut,
-            );
-          }),
-        ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(40, (index) {
+                double distanceFromCenter = (index - 20).abs().toDouble();
+                double heightFactor = 1.0 - (distanceFromCenter / 22);
+                double baseHeight = 15 + (heightFactor * 50);
+                
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 2.5),
+                  width: 3.5,
+                  height: baseHeight,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        const Color(0xFF6C91FF).withOpacity(0.4),
+                        const Color(0xFF6C91FF),
+                        const Color(0xFF6C91FF).withOpacity(0.4),
+                      ],
+                    ),
+                  ),
+                )
+                .animate(onPlay: (c) => _isListening ? c.repeat(reverse: true) : c.stop())
+                .scaleY(
+                  begin: 0.5,
+                  end: 1.8,
+                  duration: (400 + (index % 5) * 100).ms,
+                  delay: (index * 20).ms,
+                  curve: Curves.easeInOut,
+                );
+              }),
+            ),
+          ),
       ],
     );
   }

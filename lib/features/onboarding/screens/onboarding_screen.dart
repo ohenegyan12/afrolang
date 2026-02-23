@@ -73,7 +73,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: ElevatedButton(
           onPressed: isEnabled ? _nextStep : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: isEnabled ? const Color(0xFF007A7A) : const Color(0xFFE0E0E0),
+            backgroundColor: isEnabled 
+                ? (currentStep == 3 ? Colors.black : const Color(0xFF007A7A))
+                : const Color(0xFFE0E0E0),
             foregroundColor: Colors.white,
             elevation: 0,
             shape: RoundedRectangleBorder(
@@ -365,7 +367,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   text: "Afrolingo ",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                const TextSpan(text: "is best for people\nwho want know the basics of\n"),
+                const TextSpan(text: "is best for people who want to learn "),
                 TextSpan(
                   text: selectedLanguage,
                   style: const TextStyle(fontWeight: FontWeight.w400),
@@ -378,7 +380,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFF007A7A),
+              color: Colors.black,
               borderRadius: BorderRadius.circular(24),
             ),
             child: Column(

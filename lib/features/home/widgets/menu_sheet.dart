@@ -1,7 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:languageapp/features/settings/screens/account_settings_screen.dart';
-
+import 'package:languageapp/features/settings/screens/learn_language_screen.dart';
+import 'package:languageapp/features/settings/screens/fluency_goal_screen.dart';
+import 'package:languageapp/features/settings/screens/afrolingo_way_screen.dart';
 class MenuSheet extends StatelessWidget {
   const MenuSheet({super.key});
 
@@ -84,14 +86,26 @@ class MenuSheet extends StatelessWidget {
                   _buildMenuItem(
                     icon: Icons.language,
                     label: "Learn another language",
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pop(context); // Close menu first
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LearnLanguageScreen()),
+                      );
+                    },
                   ),
 
                   _buildDivider(),
                   _buildMenuItem(
                     icon: Icons.star_border,
                     label: "Set your fluency goal",
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pop(context); // Close menu first
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const FluencyGoalScreen()),
+                      );
+                    },
                   ),
                   _buildDivider(),
                   _buildMenuItem(
@@ -109,7 +123,13 @@ class MenuSheet extends StatelessWidget {
                   _buildMenuItem(
                     icon: Icons.check_circle_outline,
                     label: "The Afrolingo Way",
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pop(context); // Close menu first
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const AfrolingoWayScreen()),
+                      );
+                    },
                   ),
                   
                   const SizedBox(height: 16),
