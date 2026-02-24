@@ -113,6 +113,7 @@ class _ScenarioPracticeScreenState extends State<ScenarioPracticeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF9F7F2),
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             // Progress Header
@@ -184,10 +185,12 @@ class _ScenarioPracticeScreenState extends State<ScenarioPracticeScreen> {
   }
 
   Widget _buildListenStep(PracticeStep step) {
-    return Column(
+    return Center(
       key: ValueKey("listen_${_currentIndex}"),
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
         const Text(
           "HEAR AND REPEAT",
           style: TextStyle(
@@ -242,17 +245,21 @@ class _ScenarioPracticeScreenState extends State<ScenarioPracticeScreen> {
             ],
           ),
         ).animate().fadeIn().slideY(begin: 0.1, end: 0),
-        const SizedBox(height: 48),
+        const SizedBox(height: 16),
         _buildTranslationPeek(step),
-      ],
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildMatchStep(PracticeStep step) {
-    return Column(
+    return Center(
       key: ValueKey("match_${_currentIndex}"),
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
         const Text(
           "SELECT THE CORRECT TRANSLATION",
           textAlign: TextAlign.center,
@@ -283,7 +290,9 @@ class _ScenarioPracticeScreenState extends State<ScenarioPracticeScreen> {
           childAspectRatio: 1.2,
           children: step.options!.map((opt) => _buildOptionCard(opt)).toList(),
         ),
-      ],
+          ],
+        ),
+      ),
     );
   }
 
@@ -362,7 +371,7 @@ class _ScenarioPracticeScreenState extends State<ScenarioPracticeScreen> {
 
   Widget _buildListenBottom() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(32, 24, 32, 48),
+      padding: EdgeInsets.fromLTRB(32, 24, 32, 24 + MediaQuery.of(context).padding.bottom),
       decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(40))),
       child: Column(
         mainAxisSize: MainAxisSize.min,
